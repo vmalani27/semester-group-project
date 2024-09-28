@@ -1,0 +1,235 @@
+Error with email 10:
+From: "Coursera" <Coursera@m.learn.coursera.org>
+Content: 
+Error: Content is not a string
+
+Error with email 40:
+From: SkillDzire <info@skilldzire.com>
+Content: 
+Error: Content is not a string
+
+Error with email 51:
+From: Meetup <info@email.meetup.com>
+Content: 
+Error: Content is not a string
+
+Error with email 53:
+From: =?UTF-8?B?TGlua2VkSW4=?= <linkedin@e.linkedin.com>
+Content: 
+Error: Content is not a string
+
+Error with email 59:
+From: "Meetup" <info@meetup.com>
+Content: 
+Error: Content is not a string
+
+Error with email 60:
+From: "Meetup" <info@meetup.com>
+Content: 
+Error: Content is not a string
+
+Error with email 108:
+From: "23DCS056 VANSH MALANI" <23dcs056@charusat.edu.in>
+Content: 
+Error: Content is not a string
+
+Error with email 109:
+From: "Coursera" <Coursera@m.learn.coursera.org>
+Content: 
+Error: Content is not a string
+
+Error with email 128:
+From: =?UTF-8?B?TGlua2VkSW4=?= <linkedin@e.linkedin.com>
+Content: 
+Error: Content is not a string
+
+Error with email 133:
+From: "Coursera" <Coursera@m.learn.coursera.org>
+Content: 
+Error: Content is not a string
+
+Error with email 138:
+From: 23EC005 PARTHIV BHATT <23ec005@charusat.edu.in>
+Content: 
+Error: Content is not a string
+
+Error with email 155:
+From: Meetup <info@email.meetup.com>
+Content: 
+Error: Content is not a string
+
+Error with email 159:
+From: =?UTF-8?B?TGlua2VkSW4=?= <linkedin@e.linkedin.com>
+Content: 
+Error: Content is not a string
+
+Error with email 172:
+From: service@account.mathworks.com
+Content: 
+Error: Content is not a string
+
+Error with email 178:
+From: 23DCS056 VANSH MALANI <23dcs056@charusat.edu.in>
+Content: 
+Error: Content is not a string
+
+Error with email 184:
+From: 23DCS056 VANSH MALANI <23dcs056@charusat.edu.in>
+Content: 
+Error: Content is not a string
+
+Error with email 225:
+From: GitHub <noreply@github.com>
+Content: 
+Error: Content is not a string
+
+Error with email 226:
+From: =?UTF-8?B?TGlua2VkSW4=?= <linkedin@e.linkedin.com>
+Content: 
+Error: Content is not a string
+
+Error with email 228:
+From: charusat.support@littlemoreinnovation.com
+Content: 
+Error: Content is not a string
+
+Error with email 229:
+From: charusat.support@littlemoreinnovation.com
+Content: 
+Error: Content is not a string
+
+Error with email 259:
+From: =?UTF-8?B?TGlua2VkSW4=?= <linkedin@e.linkedin.com>
+Content: 
+Error: Content is not a string
+
+Error with email 261:
+From: "Coursera" <Coursera@m.learn.coursera.org>
+Content: 
+Error: Content is not a string
+
+Error with email 291:
+From: =?UTF-8?B?TGlua2VkSW4=?= <linkedin@e.linkedin.com>
+Content: 
+Error: Content is not a string
+
+Error with email 293:
+From: NDLI CLUB <ndl.club@iitkgp.ac.in>
+Content: 
+Error: Content is not a string
+
+Error with email 319:
+From: "Meetup" <info@meetup.com>
+Content: 
+Error: Content is not a string
+
+Error with email 345:
+From: 23DCS056 VANSH MALANI <23dcs056@charusat.edu.in>
+Content: 
+Error: Content is not a string
+
+Error with email 356:
+From: "Meetup" <info@meetup.com>
+Content: 
+Error: Content is not a string
+
+Error with email 357:
+From: "Coursera" <Coursera@m.learn.coursera.org>
+Content: 
+Error: Content is not a string
+
+Error with email 364:
+From: "Coursera" <Coursera@m.learn.coursera.org>
+Content: 
+Error: Content is not a string
+
+Error with email 365:
+From: Aishwariya Budhrani <aishwariyabudhrani.dcs@charusat.ac.in>
+Content: 
+Error: Content is not a string
+
+Error with email 400:
+From: service@account.mathworks.com
+Content: 
+Error: Content is not a string
+
+Error with email 410:
+From: eLibrary Support <elibrary.support@openpage.com>
+Content: 
+Error: Content is not a string
+
+Error with email 450:
+From: 23DCS056 VANSH MALANI <23dcs056@charusat.edu.in>
+Content: 
+Error: Content is not a string
+
+Error with email 457:
+From: "Meetup" <info@meetup.com>
+Content: 
+Error: Content is not a string
+
+Error with email 460:
+From: 23DCS014 SAUMYA CHANDWANI <23dcs014@charusat.edu.in>
+Content: 
+Error: Content is not a string
+
+Error with email 463:
+From: "23DCS056 VANSH MALANI" <23dcs056@charusat.edu.in>
+Content: 
+Error: Content is not a string
+
+Error with email 469:
+From: Krishna Patel <krishnapatel.ce@charusat.ac.in>
+Content: 
+Error: Content is not a string
+
+Error with email 476:
+From: "Coursera" <Coursera@m.learn.coursera.org>
+Content: 
+Error: Content is not a string
+
+Error with email 493:
+From: =?UTF-8?B?TGlua2VkSW4=?= <linkedin@e.linkedin.com>
+Content: 
+Error: Content is not a string
+
+Error with email 497:
+From: service@account.mathworks.com
+Content: 
+Error: Content is not a string
+
+Error with email 498:
+From: service@account.mathworks.com
+Content: 
+Error: Content is not a string
+
+Error with email 503:
+From: AWS Cloud Club at Charusat <info@email.meetup.com>
+Content: 
+Error: Content is not a string
+
+Error with email 505:
+From: =?UTF-8?B?TGlua2VkSW4=?= <linkedin@e.linkedin.com>
+Content: 
+Error: Content is not a string
+
+Error with email 524:
+From: 23DCS056 VANSH MALANI <23dcs056@charusat.edu.in>
+Content: 
+Error: Content is not a string
+
+Error with email 536:
+From: "Coursera" <Coursera@m.learn.coursera.org>
+Content: 
+Error: Content is not a string
+
+Error with email 547:
+From: "Coursera" <Coursera@m.learn.coursera.org>
+Content: 
+Error: Content is not a string
+
+Error with email 551:
+From: service@account.mathworks.com
+Content: 
+Error: Content is not a string
+
