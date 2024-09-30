@@ -140,7 +140,7 @@ class _UserAccountPageState extends State<UserAccountPage> {
                                   padding: const EdgeInsets.symmetric(
                                       horizontal: 30, vertical: 10),
                                 ),
-                                child: Text('Unlink Google Account'),
+                                child: const Text('Unlink Google Account'),
                               ),
                               const SizedBox(height: 8),
                               const Text(
@@ -155,7 +155,7 @@ class _UserAccountPageState extends State<UserAccountPage> {
                                   padding: const EdgeInsets.symmetric(
                                       horizontal: 30, vertical: 10),
                                 ),
-                                child: Text('Link Google Account'),
+                                child: const Text('Link Google Account'),
                               ),
                               const SizedBox(height: 8),
                               const Text(

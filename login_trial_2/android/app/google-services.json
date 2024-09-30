@@ -15,6 +15,14 @@
       },
       "oauth_client": [
         {
+          "client_id": "551724754459-516al09g8pej9pv1fempsfeatgo4ol1s.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.friday.unidash",
+            "certificate_hash": "fd26e47d6be8b91726e44375da529626cbb3409b"
+          }
+        },
+        {
           "client_id": "551724754459-jfr5qel37k6b1pemdg6hgme5upjeljr6.apps.googleusercontent.com",
           "client_type": 3
         }
@@ -30,6 +38,13 @@
             {
               "client_id": "551724754459-j3rlq5jmvvgngf7q1r11l78b2rdai806.apps.googleusercontent.com",
               "client_type": 3
+            },
+            {
+              "client_id": "551724754459-8vb5mj0fig6gnbp7jdsbsfa7t8cvt6ek.apps.googleusercontent.com",
+              "client_type": 2,
+              "ios_info": {
+                "bundle_id": "com.example.loginTrial2"
+              }
             }
           ]
         }

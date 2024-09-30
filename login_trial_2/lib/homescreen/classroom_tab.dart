@@ -7,6 +7,8 @@ import 'package:login_trial_2/auth/firebase/class_service.dart'; // Your ClassSe
 import 'package:login_trial_2/auth/firebase/auth_service.dart'; // GoogleAccountService
 
 class ClassroomTab extends StatefulWidget {
+  const ClassroomTab({super.key});
+
   @override
   _ClassroomTabState createState() => _ClassroomTabState();
 }
@@ -21,7 +23,7 @@ class _ClassroomTabState extends State<ClassroomTab> {
     _fetchClassroomAnnouncements();
   }
 
-  // Fetch classroom announcements with teacher names
+  // Fetch classroom announcements
   Future<void> _fetchClassroomAnnouncements() async {
     try {
       print('Fetching classroom announcements...');
@@ -41,13 +43,8 @@ class _ClassroomTabState extends State<ClassroomTab> {
           [
             'https://www.googleapis.com/auth/classroom.announcements.readonly',
             'https://www.googleapis.com/auth/classroom.courses.readonly',
-            'https://www.googleapis.com/auth/classroom.profile.emails',
-            'https://www.googleapis.com/auth/classroom.profile.photos',
             'https://www.googleapis.com/auth/classroom.rosters',
             'https://www.googleapis.com/auth/classroom.rosters.readonly',
-            'https://www.googleapis.com/auth/classroom.profile.emails',
-            'https://www.googleapis.com/auth/classroom.profile.photos',
-            'https://www.googleapis.com/auth/homeroom'
           ],
         ),
       );
@@ -59,19 +56,8 @@ class _ClassroomTabState extends State<ClassroomTab> {
       List<Announcement> announcements =
           await apiService.fetchAllCourseAnnouncements();
 
-      // Fetch teacher profiles for each announcement's creatorUserId
-      List<Announcement> announcementsWithTeacherNames = [];
-      for (var announcement in announcements) {
-        // Fetch user profile based on creatorUserId
-        final userProfile =
-            await apiService.fetchUserProfile(announcement.creatorUserId!);
-        announcement.creatorUserId = userProfile?.name?.fullName ??
-            'Unknown Teacher'; // Replace with full name
-        announcementsWithTeacherNames.add(announcement); // Add to list
-      }
-
       setState(() {
-        classroomAnnouncements = announcementsWithTeacherNames;
+        classroomAnnouncements = announcements; // Set the fetched announcements
         isLoading = false;
       });
 
@@ -87,9 +73,9 @@ class _ClassroomTabState extends State<ClassroomTab> {
   @override
   Widget build(BuildContext context) {
     return isLoading
-        ? Center(child: CircularProgressIndicator())
+        ? const Center(child: CircularProgressIndicator())
         : classroomAnnouncements.isEmpty
-            ? Center(child: Text('No announcements found.'))
+            ? const Center(child: Text('No announcements found.'))
             : ListView.builder(
                 itemCount: classroomAnnouncements.length,
                 itemBuilder: (context, index) {
@@ -101,15 +87,13 @@ class _ClassroomTabState extends State<ClassroomTab> {
 
   // Build a card widget for each announcement
   Widget _buildAnnouncementCard(Announcement announcement) {
-    final teacherName = announcement.creatorUserId ??
-        'Unknown Teacher'; // Display teacher's full name
     final announcementText =
         announcement.text ?? 'No Content'; // Show announcement text
     final courseTitle =
         announcement.courseId ?? 'Unknown Course'; // Show course name
 
     return Card(
-      margin: EdgeInsets.all(10),
+      margin: const EdgeInsets.all(10),
       color: _generateCourseColor(courseTitle), // Unique color for each course
       child: Padding(
         padding: const EdgeInsets.all(12.0),
@@ -118,17 +102,12 @@ class _ClassroomTabState extends State<ClassroomTab> {
           children: [
             Text(
               'Course: $courseTitle',
-              style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18),
+              style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 18),
             ),
-            SizedBox(height: 6),
-            Text(
-              'Teacher: $teacherName',
-              style: TextStyle(fontSize: 16),
-            ),
-            SizedBox(height: 6),
+            const SizedBox(height: 6),
             Text(
               'Announcement: $announcementText',
-              style: TextStyle(fontSize: 16),
+              style: const TextStyle(fontSize: 16),
             ),
           ],
         ),

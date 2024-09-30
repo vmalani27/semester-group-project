@@ -32,17 +32,10 @@ class ClassService {
             print(
                 'Found ${announcementsResponse.announcements!.length} announcements in $courseName.');
 
-            // Loop through announcements and fetch teacher names
+            // Loop through announcements and tag the course name for UI
             for (var announcement in announcementsResponse.announcements!) {
-              // Fetch the user profile for the creatorUserId (teacher)
-              var teacherProfile =
-                  await fetchUserProfile(announcement.creatorUserId!);
-              String teacherName =
-                  teacherProfile?.name?.fullName ?? 'Unknown Teacher';
-
-              // Tag the course name and teacher name for UI
+              // Tag the course name for UI
               announcement.courseId = courseName;
-              announcement.creatorUserId = teacherName;
 
               // Add announcement to the list
               allAnnouncements.add(announcement);
@@ -59,17 +52,5 @@ class ClassService {
     }
 
     return allAnnouncements;
-  }
-
-  // Fetch user profile to get teacher name
-  Future<UserProfile?> fetchUserProfile(String userId) async {
-    try {
-      // Fetch user profile by userId
-      var userProfile = await _classroomApi.userProfiles.get(userId);
-      return userProfile;
-    } catch (e) {
-      print('Error fetching user profile for userId $userId: $e');
-      return null;
-    }
   }
 }

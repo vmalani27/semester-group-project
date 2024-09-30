@@ -15,8 +15,7 @@ class AuthService extends ChangeNotifier {
       'https://www.googleapis.com/auth/gmail.readonly',
       'https://www.googleapis.com/auth/classroom.announcements.readonly',
       'https://www.googleapis.com/auth/classroom.courses.readonly',
-      'https://www.googleapis.com/auth/classroom.profile.emails',
-      'https://www.googleapis.com/auth/classroom.profile.photos',
+      'https://www.googleapis.com/auth/classroom.student-submissions.me.readonly'
     ],
   );
 
@@ -27,6 +26,46 @@ class AuthService extends ChangeNotifier {
   // Getters for access token and expiry
   String? get accessToken => _accessToken;
   DateTime? get accessTokenExpiry => _accessTokenExpiry;
+
+  // Check if the AuthService is ready for API calls
+  Future<void> checkApiCallReadiness(BuildContext context) async {
+    await refreshTokenIfNeeded(context); // Ensure the token is refreshed
+
+    if (accessToken != null && accessTokenExpiry != null) {
+      if (accessTokenExpiry!.isAfter(DateTime.now())) {
+        // Debug message if ready
+        print("AuthService is ready for API calls!");
+      } else {
+        // If token is expired, notify user
+        print("Access token is expired, please re-authenticate.");
+        _showMessage(
+            context, "Access token is expired, please re-authenticate.");
+      }
+    } else {
+      // If no access token, notify user
+      print("No access token available, please sign in.");
+      _showMessage(context, "No access token available, please sign in.");
+    }
+  }
+
+  // Sign in with email and password
+  Future<User?> signInWithEmailAndPassword(
+      String email, String password, BuildContext context) async {
+    try {
+      UserCredential userCredential = await _auth.signInWithEmailAndPassword(
+        email: email,
+        password: password,
+      );
+
+      // Notify listeners of change
+      notifyListeners();
+
+      return userCredential.user;
+    } catch (e) {
+      _showMessage(context, 'Error signing in with email: $e');
+      return null;
+    }
+  }
 
   // Sign in with Google and fetch token
   Future<User?> signInWithGoogle(BuildContext context) async {
@@ -72,14 +111,13 @@ class AuthService extends ChangeNotifier {
     }
   }
 
-  // Get AuthClient for making API requests
-  Future<http.Client?> getAuthClient() async {
+  Future<AuthClient?> getAuthClient() async {
     await _loadAccessToken();
     if (_accessToken == null) {
       return null; // Token is not available
     }
 
-    // Create a client using the stored access token
+    // Create an http.Client using the stored access token
     final client = authenticatedClient(
       http.Client(),
       AccessCredentials(
@@ -92,7 +130,9 @@ class AuthService extends ChangeNotifier {
         [],
       ),
     );
-    return client;
+
+    // Return as AuthClient
+    return client as AuthClient; // Ensure to cast it to AuthClient
   }
 
   // Sign out from Firebase and Google

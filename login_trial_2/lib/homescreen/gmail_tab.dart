@@ -1,15 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:googleapis/gmail/v1.dart';
-import 'package:googleapis_auth/auth_io.dart';
-import 'package:http/http.dart';
-import 'package:login_trial_2/auth/firebase/api_service.dart';
 import 'package:login_trial_2/auth/firebase/auth_service.dart';
+import 'package:login_trial_2/auth/firebase/gmail_service.dart';
 import 'package:provider/provider.dart';
 
 class GmailTab extends StatefulWidget {
-  final ApiService apiService; // Add ApiService instance
+  final ApiService apiService;
 
-  GmailTab({required this.apiService}); // Update constructor
+  const GmailTab({super.key, required this.apiService});
 
   @override
   _GmailTabState createState() => _GmailTabState();
@@ -18,8 +16,6 @@ class GmailTab extends StatefulWidget {
 class _GmailTabState extends State<GmailTab> {
   List<Message> unreadMessages = [];
   bool isLoading = true;
-  bool isFetchingMore = false;
-  String? nextPageToken;
 
   @override
   void initState() {
@@ -27,77 +23,60 @@ class _GmailTabState extends State<GmailTab> {
     _fetchUnreadEmails();
   }
 
-  Future<void> _fetchUnreadEmails({String? pageToken}) async {
-    if (isLoading || isFetchingMore) return;
-
-    if (pageToken != null) {
-      setState(() {
-        isFetchingMore = true;
-      });
-    } else {
-      setState(() {
-        isLoading = true;
-      });
-    }
+  Future<void> _fetchUnreadEmails() async {
+    setState(() {
+      isLoading = true; // Show loading indicator
+    });
 
     try {
       print('Fetching unread emails...');
+      final client = await Provider.of<AuthService>(context, listen: false)
+          .getAuthClient();
 
-      // Use the passed apiService instance to fetch emails
-      final fetchedMessages =
-          await widget.apiService.fetchUserEmails(nextPageToken: pageToken);
+      if (client == null) {
+        print('AuthClient is null, cannot fetch emails.');
+        return;
+      }
 
+      final fetchedMessages = await widget.apiService.fetchLast15Emails();
       setState(() {
-        unreadMessages.addAll(fetchedMessages);
-        nextPageToken =
-            fetchedMessages.isNotEmpty ? fetchedMessages.last.id : null;
+        unreadMessages = fetchedMessages; // Store fetched messages
       });
-
       print('Fetched ${fetchedMessages.length} unread messages.');
     } catch (e) {
       print('Error fetching unread emails: $e');
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Error fetching unread emails: $e')),
+      );
     } finally {
       setState(() {
-        isLoading = false;
-        isFetchingMore = false;
-        print('Loading completed.');
+        isLoading = false; // Hide loading indicator
       });
     }
   }
 
   @override
   Widget build(BuildContext context) {
-    print('Building GmailTab widget...');
-    return NotificationListener<ScrollNotification>(
-      onNotification: (ScrollNotification scrollInfo) {
-        if (!isLoading &&
-            !isFetchingMore &&
-            scrollInfo.metrics.pixels == scrollInfo.metrics.maxScrollExtent &&
-            nextPageToken != null) {
-          _fetchUnreadEmails(pageToken: nextPageToken);
-        }
-        return true;
-      },
-      child: isLoading && unreadMessages.isEmpty
-          ? Center(child: CircularProgressIndicator())
-          : unreadMessages.isEmpty
-              ? Center(child: Text('No unread messages found.'))
-              : ListView.builder(
-                  itemCount: unreadMessages.length + (isFetchingMore ? 1 : 0),
-                  itemBuilder: (context, index) {
-                    if (index == unreadMessages.length) {
-                      return Center(child: CircularProgressIndicator());
-                    }
-                    final message = unreadMessages[index];
-                    return ListTile(
-                      title: Text(message.snippet ?? 'No Subject'),
-                      subtitle: Text(message.payload?.headers
-                              ?.firstWhere((header) => header.name == 'From')
-                              .value ??
-                          ''),
-                    );
-                  },
-                ),
-    );
+    return isLoading
+        ? const Center(child: CircularProgressIndicator())
+        : unreadMessages.isEmpty
+            ? const Center(child: Text('No unread messages found.'))
+            : ListView.builder(
+                itemCount: unreadMessages.length,
+                itemBuilder: (context, index) {
+                  final message = unreadMessages[index];
+                  return ListTile(
+                    title: Text(message.snippet ?? 'No Subject'),
+                    subtitle: Text(message.payload?.headers
+                            ?.firstWhere(
+                              (header) => header.name == 'From',
+                              orElse: () => MessagePartHeader(
+                                  name: 'From', value: 'No sender'),
+                            )
+                            .value ??
+                        ''),
+                  );
+                },
+              );
   }
 }

@@ -181,7 +181,7 @@ class _RegisterState extends State<Register> {
                   textStyle: const TextStyle(
                       fontWeight: FontWeight.bold, fontSize: 25),
                 ),
-                child: Text('Register'),
+                child: const Text('Register'),
               ),
               const SizedBox(height: 16),
               TextButton(

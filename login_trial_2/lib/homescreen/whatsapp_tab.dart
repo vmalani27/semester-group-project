@@ -4,6 +4,8 @@ import 'package:provider/provider.dart';
 // import 'app_data_provider.dart'; // import the provider file
 
 class WhatsAppTab extends StatelessWidget {
+  const WhatsAppTab({super.key});
+
   @override
   Widget build(BuildContext context) {
     final appData = Provider.of<AppDataProvider>(context);
@@ -15,7 +17,7 @@ class WhatsAppTab extends StatelessWidget {
             // Simulate refreshing WhatsApp data
             appData.refreshWhatsAppMessages();
           },
-          child: Text("Refresh WhatsApp"),
+          child: const Text("Refresh WhatsApp"),
         ),
         Expanded(
           child: ListView.builder(

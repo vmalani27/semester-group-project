@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:google_sign_in/google_sign_in.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 class Register extends StatefulWidget {
@@ -10,45 +11,27 @@ class Register extends StatefulWidget {
 }
 
 class _RegisterState extends State<Register> {
-  bool _obscureText = true;
-  bool _obscureTextConfirm = true;
-  bool _isButtonEnabled = false;
-  bool _showPasswordField = false;
-  bool _showConfirmPasswordField = false;
-
-  final _emailController = TextEditingController();
-  final _passwordController = TextEditingController();
-  final _confirmPasswordController = TextEditingController();
   final FirebaseAuth _auth = FirebaseAuth.instance;
-
-  final _focusPassword = FocusNode();
-  final _focusConfirmPassword = FocusNode();
+  final GoogleSignIn _googleSignIn = GoogleSignIn();
+  final _emailController = TextEditingController();
+  bool _isButtonEnabled = false;
 
   @override
   void initState() {
     super.initState();
-    // Add listeners to text controllers to enable/disable the register button
+    // Add listener to email controller to enable/disable the Google Sign-In button
     _emailController.addListener(_updateButtonState);
-    _passwordController.addListener(_updateButtonState);
-    _confirmPasswordController.addListener(_updateButtonState);
   }
 
   @override
   void dispose() {
     _emailController.dispose();
-    _passwordController.dispose();
-    _confirmPasswordController.dispose();
-    _focusPassword.dispose();
-    _focusConfirmPassword.dispose();
     super.dispose();
   }
 
   void _updateButtonState() {
     setState(() {
-      _isButtonEnabled = _emailController.text.isNotEmpty &&
-          _passwordController.text.isNotEmpty &&
-          _confirmPasswordController.text.isNotEmpty &&
-          _passwordController.text == _confirmPasswordController.text;
+      _isButtonEnabled = _emailController.text.isNotEmpty;
     });
   }
 
@@ -57,45 +40,37 @@ class _RegisterState extends State<Register> {
     await prefs.setBool('isLoggedIn', true);
   }
 
-  Future<void> _register() async {
-    if (_passwordController.text != _confirmPasswordController.text) {
-      _showErrorDialog('Passwords do not match');
-      return;
-    }
-
+  Future<void> _signInWithGoogle() async {
     try {
-      // Attempt to create the user
-      await _auth.createUserWithEmailAndPassword(
-        email: _emailController.text.trim(),
-        password: _passwordController.text.trim(),
+      // Initiate Google Sign-In process
+      final GoogleSignInAccount? googleUser = await _googleSignIn.signIn();
+      if (googleUser == null) {
+        _showErrorDialog('Google Sign-In canceled by user.');
+        return;
+      }
+
+      // Authenticate with Google
+      final GoogleSignInAuthentication googleAuth =
+          await googleUser.authentication;
+
+      // Create a new credential
+      final credential = GoogleAuthProvider.credential(
+        accessToken: googleAuth.accessToken,
+        idToken: googleAuth.idToken,
       );
+
+      // Sign in to Firebase with the Google credential
+      await _auth.signInWithCredential(credential);
 
       // Save login state
       await _saveLoginState();
 
-      // Navigate to the desired screen after successful registration
+      // Navigate to the desired screen after successful sign-in
       Navigator.pushReplacementNamed(context, '/user-details');
-    } on FirebaseAuthException catch (e) {
-      String errorMessage;
-      switch (e.code) {
-        case 'weak-password':
-          errorMessage = 'The password provided is too weak.';
-          break;
-        case 'email-already-in-use':
-          errorMessage = 'The account already exists for that email.';
-          break;
-        case 'invalid-email':
-          errorMessage = 'The email address is badly formatted.';
-          break;
-        default:
-          errorMessage = 'Failed to register: ${e.message}';
-          break;
-      }
-      _showErrorDialog(errorMessage);
     } catch (e) {
       // Print error to console for debugging
-      print('Error during registration: $e');
-      _showErrorDialog('An unexpected error occurred. Please try again.');
+      print('Error during Google sign-in: $e');
+      _showErrorDialog('Failed to sign in with Google. Please try again.');
     }
   }
 
@@ -103,7 +78,7 @@ class _RegisterState extends State<Register> {
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
-        title: const Text('Registration Failed'),
+        title: const Text('Sign-In Failed'),
         content: Text(message),
         actions: [
           TextButton(
@@ -147,82 +122,20 @@ class _RegisterState extends State<Register> {
                 ),
               ),
               const SizedBox(height: 40),
-              // Email Field
+              // Email Field (optional)
               TextField(
                 controller: _emailController,
                 decoration: InputDecoration(
-                  labelText: 'Email',
+                  labelText: 'Email (for reference)',
                   border: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(20),
                   ),
                 ),
                 keyboardType: TextInputType.emailAddress,
-                onSubmitted: (_) {
-                  setState(() {
-                    _showPasswordField = true;
-                  });
-                  _focusPassword.requestFocus();
-                },
               ),
-              const SizedBox(height: 16),
-              // Password Field
-              if (_showPasswordField)
-                TextField(
-                  controller: _passwordController,
-                  focusNode: _focusPassword,
-                  decoration: InputDecoration(
-                    labelText: 'Password',
-                    border: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(20),
-                    ),
-                    suffixIcon: IconButton(
-                      icon: Icon(
-                        _obscureText ? Icons.visibility : Icons.visibility_off,
-                      ),
-                      onPressed: () {
-                        setState(() {
-                          _obscureText = !_obscureText;
-                        });
-                      },
-                    ),
-                  ),
-                  obscureText: _obscureText,
-                  onSubmitted: (_) {
-                    setState(() {
-                      _showConfirmPasswordField = true;
-                    });
-                    _focusConfirmPassword.requestFocus();
-                  },
-                ),
-              const SizedBox(height: 16),
-              // Confirm Password Field
-              if (_showConfirmPasswordField)
-                TextField(
-                  controller: _confirmPasswordController,
-                  focusNode: _focusConfirmPassword,
-                  decoration: InputDecoration(
-                    labelText: 'Confirm Password',
-                    border: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(20),
-                    ),
-                    suffixIcon: IconButton(
-                      icon: Icon(
-                        _obscureTextConfirm
-                            ? Icons.visibility
-                            : Icons.visibility_off,
-                      ),
-                      onPressed: () {
-                        setState(() {
-                          _obscureTextConfirm = !_obscureTextConfirm;
-                        });
-                      },
-                    ),
-                  ),
-                  obscureText: _obscureTextConfirm,
-                ),
               const SizedBox(height: 32),
               ElevatedButton(
-                onPressed: _isButtonEnabled ? _register : null,
+                onPressed: _isButtonEnabled ? _signInWithGoogle : null,
                 style: ElevatedButton.styleFrom(
                   backgroundColor:
                       _isButtonEnabled ? Colors.lightBlue : Colors.grey,
@@ -231,7 +144,7 @@ class _RegisterState extends State<Register> {
                   textStyle: const TextStyle(
                       fontWeight: FontWeight.bold, fontSize: 25),
                 ),
-                child: Text('Register'),
+                child: const Text('Sign in with Google'),
               ),
               const SizedBox(height: 16),
               TextButton(

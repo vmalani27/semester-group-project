@@ -9,7 +9,7 @@ void main() {
         ChangeNotifierProvider(create: (context) => MessageProvider2()),
         ChangeNotifierProvider(create: (context) => MessageProvider3()),
       ],
-      child: MyApp(),
+      child: const MyApp(),
     ),
   );
 }
@@ -24,7 +24,7 @@ class MyApp extends StatelessWidget {
       theme: ThemeData(
         primarySwatch: Colors.blue,
       ),
-      home: MessageTabs(),
+      home: const MessageTabs(),
     );
   }
 }
@@ -56,7 +56,7 @@ class MessageTabs extends StatelessWidget {
             ],
           ),
         ),
-        body: TabBarView(
+        body: const TabBarView(
           children: [
             MessageList(serviceIndex: 1),
             MessageList(serviceIndex: 2),

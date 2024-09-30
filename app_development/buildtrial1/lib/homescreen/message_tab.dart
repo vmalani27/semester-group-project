@@ -45,7 +45,7 @@ class MessageTabs extends StatelessWidget {
         body: Container(
           color: const Color.fromARGB(
               255, 212, 209, 237), // Set the background color for the body
-          child: TabBarView(
+          child: const TabBarView(
             children: [
               MessageList(serviceIndex: 1),
               MessageList(serviceIndex: 2),
@@ -58,7 +58,7 @@ class MessageTabs extends StatelessWidget {
             // Define what happens when the button is pressed
           }, // Replace with the desired icon
           backgroundColor: Colors.blue,
-          child: Icon(Icons.add), // Set the color of the FAB
+          child: const Icon(Icons.add), // Set the color of the FAB
         ),
       ),
     );

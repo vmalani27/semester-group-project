@@ -1,6 +1,7 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
+import 'package:google_sign_in/google_sign_in.dart';
 
 class Login extends StatefulWidget {
   const Login({super.key});
@@ -10,35 +11,28 @@ class Login extends StatefulWidget {
 }
 
 class _LoginState extends State<Login> {
-  final TextEditingController _emailController = TextEditingController();
-  final TextEditingController _passwordController = TextEditingController();
+  final GoogleSignIn _googleSignIn = GoogleSignIn();
 
-  bool _obscureText = true;
-  bool _isButtonEnabled = false;
-
-  @override
-  void initState() {
-    super.initState();
-
-    // Add listeners to the text controllers to enable/disable the login button
-    _emailController.addListener(_updateButtonState);
-    _passwordController.addListener(_updateButtonState);
-  }
-
-  void _updateButtonState() {
-    setState(() {
-      _isButtonEnabled = _emailController.text.isNotEmpty &&
-          _passwordController.text.isNotEmpty;
-    });
-  }
-
-  Future<void> signIn() async {
+  Future<void> signInWithGoogle() async {
     try {
-      UserCredential userCredential =
-          await FirebaseAuth.instance.signInWithEmailAndPassword(
-        email: _emailController.text.trim(),
-        password: _passwordController.text.trim(),
+      final GoogleSignInAccount? googleUser = await _googleSignIn.signIn();
+      if (googleUser == null) {
+        // User canceled the sign-in
+        return;
+      }
+
+      final GoogleSignInAuthentication googleAuth =
+          await googleUser.authentication;
+
+      // Create a new credential
+      final credential = GoogleAuthProvider.credential(
+        accessToken: googleAuth.accessToken,
+        idToken: googleAuth.idToken,
       );
+
+      // Sign in to Firebase with the Google credentials
+      UserCredential userCredential =
+          await FirebaseAuth.instance.signInWithCredential(credential);
 
       User? user = userCredential.user;
       if (user != null) {
@@ -54,14 +48,7 @@ class _LoginState extends State<Login> {
         }
       }
     } on FirebaseAuthException catch (e) {
-      String errorMessage;
-      if (e.code == 'user-not-found') {
-        errorMessage = 'No user found for that email.';
-      } else if (e.code == 'wrong-password') {
-        errorMessage = 'Wrong password provided for that user.';
-      } else {
-        errorMessage = 'An error occurred. Please try again.';
-      }
+      String errorMessage = 'An error occurred. Please try again.';
       if (mounted) {
         _showErrorDialog(errorMessage);
       }
@@ -69,28 +56,6 @@ class _LoginState extends State<Login> {
       if (mounted) {
         _showErrorDialog('An unexpected error occurred. Please try again.');
       }
-    }
-  }
-
-  Future<bool> _isGoogleAccountLinked(User user) async {
-    try {
-      DocumentSnapshot userDetails = await FirebaseFirestore.instance
-          .collection('users')
-          .doc(user.uid)
-          .get();
-
-      final data = userDetails.data() as Map<String, dynamic>?;
-
-      if (data == null) return false;
-
-      Map<String, dynamic>? apiIntegrationStatus = data['apiIntegrationStatus'];
-
-      return apiIntegrationStatus != null &&
-          apiIntegrationStatus.containsKey('Google') &&
-          apiIntegrationStatus['Google'] == 'completed';
-    } catch (e) {
-      print('Error checking Google account linkage: $e');
-      return false;
     }
   }
 
@@ -140,15 +105,6 @@ class _LoginState extends State<Login> {
   }
 
   @override
-  void dispose() {
-    _emailController.removeListener(_updateButtonState);
-    _passwordController.removeListener(_updateButtonState);
-    _emailController.dispose();
-    _passwordController.dispose();
-    super.dispose();
-  }
-
-  @override
   Widget build(BuildContext context) {
     return Scaffold(
       body: SafeArea(
@@ -193,45 +149,9 @@ class _LoginState extends State<Login> {
                         ),
                       ),
                       const SizedBox(height: 40),
-                      TextField(
-                        controller: _emailController,
-                        decoration: InputDecoration(
-                          labelText: 'Email',
-                          border: OutlineInputBorder(
-                            borderRadius: BorderRadius.circular(20),
-                          ),
-                        ),
-                        keyboardType: TextInputType.emailAddress,
-                      ),
-                      const SizedBox(height: 16),
-                      TextField(
-                        controller: _passwordController,
-                        obscureText: _obscureText,
-                        decoration: InputDecoration(
-                          labelText: 'Password',
-                          border: OutlineInputBorder(
-                            borderRadius: BorderRadius.circular(20),
-                          ),
-                          suffixIcon: IconButton(
-                            icon: Icon(
-                              _obscureText
-                                  ? Icons.visibility_off
-                                  : Icons.visibility,
-                            ),
-                            onPressed: () {
-                              setState(() {
-                                _obscureText = !_obscureText;
-                              });
-                            },
-                          ),
-                        ),
-                      ),
-                      const SizedBox(height: 32),
                       ElevatedButton(
-                        onPressed: _isButtonEnabled ? signIn : null,
+                        onPressed: signInWithGoogle,
                         style: ElevatedButton.styleFrom(
-                          backgroundColor:
-                              _isButtonEnabled ? Colors.lightBlue : Colors.grey,
                           padding: const EdgeInsets.symmetric(
                               horizontal: 50, vertical: 15),
                           textStyle: const TextStyle(
@@ -239,7 +159,7 @@ class _LoginState extends State<Login> {
                             fontSize: 25,
                           ),
                         ),
-                        child: const Text('Login'),
+                        child: const Text('Login with Google'),
                       ),
                       const SizedBox(height: 16),
                       TextButton(

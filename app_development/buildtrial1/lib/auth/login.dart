@@ -164,7 +164,7 @@ class _LoginState extends State<Login> {
                             fontSize: 25,
                           ),
                         ),
-                        child: Text('Login'),
+                        child: const Text('Login'),
                       ),
                       const SizedBox(height: 16),
                       TextButton(

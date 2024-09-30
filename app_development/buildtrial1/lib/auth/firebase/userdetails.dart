@@ -217,7 +217,7 @@ class _UserDetailsState extends State<UserDetails> {
                       textStyle: const TextStyle(
                           fontWeight: FontWeight.bold, fontSize: 25),
                     ),
-                    child: Text('Save Details'),
+                    child: const Text('Save Details'),
                   ),
                   const SizedBox(height: 16),
                   TextButton(

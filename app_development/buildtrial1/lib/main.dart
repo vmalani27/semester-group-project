@@ -23,7 +23,7 @@ void main() async {
         ChangeNotifierProvider(create: (context) => MessageProvider2()),
         ChangeNotifierProvider(create: (context) => MessageProvider3()),
       ],
-      child: MyApp(),
+      child: const MyApp(),
     ),
   );
 }
@@ -37,11 +37,11 @@ class MyApp extends StatelessWidget {
       debugShowCheckedModeBanner: false,
       initialRoute: '/',
       routes: {
-        '/': (context) => Splash(),
+        '/': (context) => const Splash(),
         '/welcome': (context) => const Welcome(),
-        '/register': (context) => Register(),
-        '/login': (context) => Login(),
-        '/homescreen': (context) => MessageTabs(),
+        '/register': (context) => const Register(),
+        '/login': (context) => const Login(),
+        '/homescreen': (context) => const MessageTabs(),
         '/user-details': (context) => UserDetails(),
         '/user-account': (context) => UserAccountPage(),
       },
@@ -49,7 +49,7 @@ class MyApp extends StatelessWidget {
         return Stack(
           children: [
             child!,
-            UserAccountListener(), // Add the listener widget here
+            const UserAccountListener(), // Add the listener widget here
           ],
         );
       },

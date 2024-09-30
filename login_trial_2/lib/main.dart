@@ -40,13 +40,13 @@ class MyApp extends StatelessWidget {
       debugShowCheckedModeBanner: false,
       initialRoute: '/',
       routes: {
-        '/': (context) => Splash(),
+        '/': (context) => const Splash(),
         '/welcome': (context) => const Welcome(),
-        '/register': (context) => Register(),
-        '/login': (context) => Login(),
+        '/register': (context) => const Register(),
+        '/login': (context) => const Login(),
         '/homescreen': (context) => HomeScreen(),
-        '/user-details': (context) => UserDetails(),
-        '/user-account': (context) => UserAccountPage(),
+        '/user-details': (context) => const UserDetails(),
+        '/user-account': (context) => const UserAccountPage(),
       },
       // Add UserAccountListener in the builder method
       builder: (context, child) {
@@ -124,23 +124,21 @@ class _UserAccountListenerState extends State<UserAccountListener> {
       // Fetch current profile picture URL
       String? currentProfilePictureUrl = user.photoURL;
 
-      if (currentProfilePictureUrl != null) {
-        // Get the profile picture URL from Firestore and compare
-        DocumentSnapshot<Map<String, dynamic>> userDoc = await FirebaseFirestore
-            .instance
+      // Get the profile picture URL from Firestore and compare
+      DocumentSnapshot<Map<String, dynamic>> userDoc = await FirebaseFirestore
+          .instance
+          .collection('users')
+          .doc(user.uid)
+          .get();
+
+      String? storedProfilePictureUrl = userDoc.data()?['profilePicture'];
+
+      if (currentProfilePictureUrl != storedProfilePictureUrl) {
+        // Update the profile picture in Firestore if needed
+        await FirebaseFirestore.instance
             .collection('users')
             .doc(user.uid)
-            .get();
-
-        String? storedProfilePictureUrl = userDoc.data()?['profilePicture'];
-
-        if (currentProfilePictureUrl != storedProfilePictureUrl) {
-          // Update the profile picture in Firestore if needed
-          await FirebaseFirestore.instance
-              .collection('users')
-              .doc(user.uid)
-              .update({'profilePicture': currentProfilePictureUrl});
-        }
+            .update({'profilePicture': currentProfilePictureUrl});
       }
     } catch (e) {
       print('Error updating profile picture: $e');
