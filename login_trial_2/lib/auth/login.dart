@@ -47,7 +47,7 @@ class _LoginState extends State<Login> {
           }
         }
       }
-    } on FirebaseAuthException catch (e) {
+    } on FirebaseAuthException {
       String errorMessage = 'An error occurred. Please try again.';
       if (mounted) {
         _showErrorDialog(errorMessage);

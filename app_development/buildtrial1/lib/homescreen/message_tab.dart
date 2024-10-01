@@ -1,9 +1,8 @@
 // lib/homescreen/message_tab.dart
 
 import 'package:flutter/material.dart';
-import 'package:provider/provider.dart';
 import 'message_list.dart';
-import 'message_provider.dart'; // Import your providers
+// Import your providers
 
 class MessageTabs extends StatelessWidget {
   const MessageTabs({super.key});

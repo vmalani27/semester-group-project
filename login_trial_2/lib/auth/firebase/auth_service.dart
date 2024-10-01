@@ -132,7 +132,7 @@ class AuthService extends ChangeNotifier {
     );
 
     // Return as AuthClient
-    return client as AuthClient; // Ensure to cast it to AuthClient
+    return client; // Ensure to cast it to AuthClient
   }
 
   // Sign out from Firebase and Google
