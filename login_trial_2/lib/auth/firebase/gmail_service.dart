@@ -53,12 +53,12 @@ class ApiService {
         // Fetch each message using its ID and classify
         for (var messageInfo in messagesResponse.messages!) {
           print('Fetching message with ID: ${messageInfo.id}');
-          var message =
-              await gmailApi.users.messages.get('me', messageInfo.id!);
+          var message = await gmailApi.users.messages
+              .get('me', messageInfo.id!, format: 'full');
 
           // Ensure email content extraction and classification is wrapped in try-catch
           try {
-            String emailContent = _extractEmailContent(message);
+            String emailContent = _extractFullEmailContent(message);
             if (emailContent.isEmpty) {
               print('No content found for message ID: ${messageInfo.id}');
               continue; // Skip this message if no content
@@ -70,7 +70,6 @@ class ApiService {
 
             // Use the prediction to categorize the email
             // Assuming 1 is for spam (priority) and 0 is for optional
-            String category = (prediction >= 0.5) ? 'Priority' : 'Optional';
             classifiedMessages.add(ClassifiedMessage(
               message: message,
               spamProbability: prediction,
@@ -89,25 +88,17 @@ class ApiService {
     return classifiedMessages; // Return the list of classified messages
   }
 
-  // Extract the email content from Gmail message
-  String _extractEmailContent(Message message) {
+  // Extract the full email content from Gmail message, handling both text and HTML
+  String _extractFullEmailContent(Message message) {
     try {
       if (message.payload != null) {
-        // If body is directly available
-        if (message.payload!.body?.data != null) {
-          print('Extracting body content from email.');
-          return utf8.decode(base64Url.decode(message.payload!.body!.data!));
-        }
-
-        // If the message is multipart, handle the parts
-        if (message.payload!.parts != null) {
-          print('Multipart email detected. Extracting content from parts.');
-          for (var part in message.payload!.parts!) {
-            // Check if it's a text part and has data
-            if (part.mimeType == 'text/plain' && part.body?.data != null) {
-              return utf8.decode(base64Url.decode(part.body!.data!));
-            }
-          }
+        // Check if the email is a single part or multipart
+        if (message.payload!.parts == null) {
+          // Single part message, extract content directly
+          return _decodeBody(message.payload!.body?.data ?? '');
+        } else {
+          // Multipart message, extract the plain text or HTML parts
+          return _extractMultipartContent(message.payload!.parts!);
         }
       }
       print('No content found for the email.');
@@ -118,11 +109,43 @@ class ApiService {
     }
   }
 
+  // Extract and decode multipart content (text and HTML)
+  String _extractMultipartContent(List<MessagePart> parts) {
+    String textContent = '';
+    String htmlContent = '';
+
+    for (var part in parts) {
+      if (part.mimeType == 'text/plain' && part.body?.data != null) {
+        textContent = _decodeBody(part.body!.data!); // Extract plain text
+      } else if (part.mimeType == 'text/html' && part.body?.data != null) {
+        htmlContent = _decodeBody(part.body!.data!); // Extract HTML content
+      } else if (part.parts != null && part.parts!.isNotEmpty) {
+        // If there are nested parts, extract recursively
+        final nestedContent = _extractMultipartContent(part.parts!);
+        if (nestedContent.isNotEmpty) {
+          if (part.mimeType == 'text/plain') {
+            textContent = nestedContent;
+          } else if (part.mimeType == 'text/html') {
+            htmlContent = nestedContent;
+          }
+        }
+      }
+    }
+
+    // Prefer plain text, but return HTML if no plain text is available
+    return textContent.isNotEmpty ? textContent : htmlContent;
+  }
+
+  // Helper to decode base64Url encoded content
+  String _decodeBody(String encodedContent) {
+    return utf8.decode(base64Url.decode(encodedContent));
+  }
+
   // Classify the email content by sending it to the Flask API
   Future<double> classifyEmail(String emailContent) async {
     try {
       print('Sending email content to Flask API for classification.');
-      final url = Uri.parse('http://172.22.176.87:5000/predict');
+      final url = Uri.parse('http://172.22.176.86:5000');
       final response = await http
           .post(
             url,

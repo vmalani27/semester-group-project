@@ -1,7 +1,10 @@
+import 'dart:convert'; // Import for base64 decoding
+
 import 'package:flutter/material.dart';
 import 'package:googleapis/gmail/v1.dart';
 import 'package:login_trial_2/auth/firebase/auth_service.dart';
-import 'package:login_trial_2/auth/firebase/gmail_service.dart'; // Ensure ApiService is imported
+import 'package:login_trial_2/auth/firebase/gmail_service.dart';
+import 'package:login_trial_2/homescreen/fullemaiscreen.dart';
 import 'package:provider/provider.dart';
 
 class GmailTab extends StatefulWidget {
@@ -14,25 +17,24 @@ class GmailTab extends StatefulWidget {
 }
 
 class _GmailTabState extends State<GmailTab> {
-  List<ClassifiedMessage> priorityMessages = []; // For priority emails
-  List<ClassifiedMessage> optionalMessages = []; // For optional emails
+  List<ClassifiedMessage> priorityMessages = [];
+  List<ClassifiedMessage> optionalMessages = [];
   bool isLoading = true;
 
   @override
   void initState() {
     super.initState();
-    _initializeApiService(); // Initialize the ApiService
+    _initializeApiService();
   }
 
-  // Initialize ApiService and fetch emails
   Future<void> _initializeApiService() async {
     setState(() {
-      isLoading = true; // Show loading indicator
+      isLoading = true;
     });
 
     try {
-      await widget.apiService.init(); // Call init on the ApiService
-      await _fetchAndClassifyEmails(); // Fetch emails after initialization
+      await widget.apiService.init();
+      await _fetchAndClassifyEmails();
     } catch (e) {
       print('Error initializing ApiService: $e');
       ScaffoldMessenger.of(context).showSnackBar(
@@ -40,19 +42,17 @@ class _GmailTabState extends State<GmailTab> {
       );
     } finally {
       setState(() {
-        isLoading = false; // Hide loading indicator
+        isLoading = false;
       });
     }
   }
 
-  // Fetch and classify emails
   Future<void> _fetchAndClassifyEmails() async {
     setState(() {
-      isLoading = true; // Show loading indicator
+      isLoading = true;
     });
 
     try {
-      print('Fetching and classifying emails...');
       final client = await Provider.of<AuthService>(context, listen: false)
           .getAuthClient();
 
@@ -61,11 +61,9 @@ class _GmailTabState extends State<GmailTab> {
         return;
       }
 
-      // Fetch emails
       final classifiedMessages =
           await widget.apiService.fetchAndClassifyEmails();
 
-      // Separate messages into priority and optional categories based on classification
       setState(() {
         priorityMessages = classifiedMessages
             .where((message) => message.spamProbability > 0.5)
@@ -74,9 +72,6 @@ class _GmailTabState extends State<GmailTab> {
             .where((message) => message.spamProbability <= 0.5)
             .toList();
       });
-
-      print(
-          'Fetched ${priorityMessages.length} priority messages and ${optionalMessages.length} optional messages.');
     } catch (e) {
       print('Error fetching and classifying emails: $e');
       ScaffoldMessenger.of(context).showSnackBar(
@@ -84,7 +79,7 @@ class _GmailTabState extends State<GmailTab> {
       );
     } finally {
       setState(() {
-        isLoading = false; // Hide loading indicator
+        isLoading = false;
       });
     }
   }
@@ -107,17 +102,14 @@ class _GmailTabState extends State<GmailTab> {
               ),
               body: TabBarView(
                 children: [
-                  _buildEmailList(
-                      priorityMessages, "Priority"), // Priority emails tab
-                  _buildEmailList(
-                      optionalMessages, "Optional"), // Optional emails tab
+                  _buildEmailList(priorityMessages, "Priority"),
+                  _buildEmailList(optionalMessages, "Optional"),
                 ],
               ),
             ),
           );
   }
 
-  // Helper function to build a list of emails
   Widget _buildEmailList(List<ClassifiedMessage> messages, String category) {
     return messages.isEmpty
         ? Center(child: Text('No $category emails found.'))
@@ -125,22 +117,106 @@ class _GmailTabState extends State<GmailTab> {
             itemCount: messages.length,
             itemBuilder: (context, index) {
               final classifiedMessage = messages[index];
-              final message =
-                  classifiedMessage.message; // Access the original message
-              return ListTile(
-                title: Text(message.snippet ?? 'No Subject'),
-                subtitle: Text(
-                  message.payload?.headers
-                          ?.firstWhere(
-                            (header) => header.name == 'From',
-                            orElse: () => MessagePartHeader(
-                                name: 'From', value: 'No sender'),
-                          )
-                          .value ??
-                      '',
+              final message = classifiedMessage.message;
+
+              final fromHeader = message.payload?.headers
+                  ?.firstWhere(
+                    (header) => header.name == 'From',
+                    orElse: () =>
+                        MessagePartHeader(name: 'From', value: 'No sender'),
+                  )
+                  ?.value;
+
+              final dateHeader = message.payload?.headers
+                  ?.firstWhere(
+                    (header) => header.name == 'Date',
+                    orElse: () =>
+                        MessagePartHeader(name: 'Date', value: 'No date'),
+                  )
+                  ?.value;
+
+              final subject = message.snippet ?? 'No Subject';
+              final sender = fromHeader ?? 'Unknown Sender';
+              final date = dateHeader ?? 'Unknown Date';
+
+              // Get full email body and decode it
+              String body = _getDecodedBody(message);
+
+              return Padding(
+                padding: const EdgeInsets.all(8.0),
+                child: Card(
+                  elevation: 3.0,
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(15.0),
+                  ),
+                  child: ListTile(
+                    title: Text(
+                      subject,
+                      style: const TextStyle(
+                        fontWeight: FontWeight.bold,
+                        fontSize: 16.0,
+                        color: Colors.black87,
+                      ),
+                    ),
+                    subtitle: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        const SizedBox(height: 8.0),
+                        Text(
+                          'From: $sender',
+                          style: const TextStyle(
+                            fontSize: 14.0,
+                            color: Colors.black54,
+                          ),
+                        ),
+                        const SizedBox(height: 4.0),
+                        Text(
+                          'Date: $date',
+                          style: const TextStyle(
+                            fontSize: 12.0,
+                            color: Colors.black54,
+                          ),
+                        ),
+                      ],
+                    ),
+                    trailing: const Icon(Icons.arrow_forward,
+                        color: Colors.blueAccent),
+                    onTap: () {
+                      // Navigate to the FullEmailScreen on tap
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) => FullEmailScreen(
+                            subject: subject,
+                            sender: sender,
+                            date: date,
+                            body: body, // Pass the decoded email body
+                          ),
+                        ),
+                      );
+                    },
+                  ),
                 ),
               );
             },
           );
+  }
+
+  // Helper function to decode email body
+  String _getDecodedBody(Message message) {
+    final bodyData = message.payload?.parts
+        ?.firstWhere(
+            (part) =>
+                part.mimeType == 'text/plain' || part.mimeType == 'text/html',
+            orElse: () => MessagePart())
+        ?.body
+        ?.data;
+
+    if (bodyData != null) {
+      // Decode base64url encoded string
+      return utf8.decode(base64Url.decode(bodyData));
+    } else {
+      return 'No content available';
+    }
   }
 }

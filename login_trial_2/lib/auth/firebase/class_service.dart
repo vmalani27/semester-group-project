@@ -44,6 +44,17 @@ class ClassService {
             print('No announcements found for course: $courseName');
           }
         }
+
+        // Sort announcements by creation time (latest first)
+        allAnnouncements.sort((a, b) {
+          var aTime = a.creationTime != null
+              ? DateTime.parse(a.creationTime!)
+              : DateTime(0);
+          var bTime = b.creationTime != null
+              ? DateTime.parse(b.creationTime!)
+              : DateTime(0);
+          return bTime.compareTo(aTime); // Sort in descending order
+        });
       } else {
         print('No courses found.');
       }

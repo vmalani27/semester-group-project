@@ -12,6 +12,7 @@ import 'auth/login.dart';
 import 'package:login_trial_2/homescreen/tablayout.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:login_trial_2/homescreen/fullemaiscreen.dart';
 // import 'package:login_trial_2/homescreen/tablayout.dart';
 // import 'package:login_trial_2/auth/gapps_auth.dart';
 // import 'package:google_sign_in/google_sign_in.dart';
@@ -46,7 +47,7 @@ class MyApp extends StatelessWidget {
         '/login': (context) => const Login(),
         '/homescreen': (context) => HomeScreen(),
         '/user-details': (context) => const UserDetails(),
-        '/user-account': (context) => const UserAccountPage(),
+        '/user-account': (context) => const UserAccountPage()
       },
       // Add UserAccountListener in the builder method
       builder: (context, child) {
