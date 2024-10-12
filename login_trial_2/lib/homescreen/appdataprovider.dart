@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 
 class AppDataProvider with ChangeNotifier {
   List<String> gmailMessages = ["Gmail 1", "Gmail 2", "Gmail 3"];
-  List<String> whatsappMessages = ["WhatsApp 1", "WhatsApp 2", "WhatsApp 3"];
   List<String> classroomMessages = [
     "Classroom 1",
     "Classroom 2",
@@ -16,10 +15,6 @@ class AppDataProvider with ChangeNotifier {
   }
 
   // Dummy method to simulate refreshing WhatsApp messages
-  void refreshWhatsAppMessages() {
-    whatsappMessages = ["New WhatsApp 1", "New WhatsApp 2"];
-    notifyListeners();
-  }
 
   // Dummy method to simulate refreshing Classroom messages
   void refreshClassroomMessages() {

@@ -12,7 +12,6 @@ import 'auth/login.dart';
 import 'package:login_trial_2/homescreen/tablayout.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
-import 'package:login_trial_2/homescreen/fullemaiscreen.dart';
 // import 'package:login_trial_2/homescreen/tablayout.dart';
 // import 'package:login_trial_2/auth/gapps_auth.dart';
 // import 'package:google_sign_in/google_sign_in.dart';
@@ -75,8 +74,10 @@ class _UserAccountListenerState extends State<UserAccountListener> {
     super.initState();
     _listenToUserAccount();
     _checkAndUpdateProfilePicture(); // Check and update the profile picture if needed
+    _refreshTokensIfNeeded(); // Call silent sign-in to refresh tokens if user is logged in
   }
 
+  // Listen for user account changes in Firestore
   void _listenToUserAccount() {
     final User? user = FirebaseAuth.instance.currentUser;
 
@@ -95,6 +96,18 @@ class _UserAccountListenerState extends State<UserAccountListener> {
     }
   }
 
+  // Refresh tokens if needed
+  Future<void> _refreshTokensIfNeeded() async {
+    final authService = Provider.of<AuthService>(context, listen: false);
+    final User? user = FirebaseAuth.instance.currentUser;
+
+    if (user != null) {
+      // Silent sign-in to refresh tokens if user is already logged in
+      await authService.silentSignIn(context);
+    }
+  }
+
+  // Check and update profile picture if necessary
   Future<void> _checkAndUpdateProfilePicture() async {
     try {
       User? user = FirebaseAuth.instance.currentUser;
@@ -120,6 +133,7 @@ class _UserAccountListenerState extends State<UserAccountListener> {
     }
   }
 
+  // Update profile picture if necessary
   Future<void> _updateProfilePictureIfNeeded(User user) async {
     try {
       // Fetch current profile picture URL
@@ -150,4 +164,60 @@ class _UserAccountListenerState extends State<UserAccountListener> {
   Widget build(BuildContext context) {
     return const SizedBox.shrink(); // No UI needed
   }
+}
+
+Future<void> _checkAndUpdateProfilePicture() async {
+  try {
+    User? user = FirebaseAuth.instance.currentUser;
+
+    if (user != null) {
+      // Check Firestore for user's document and update profile picture
+      DocumentSnapshot<Map<String, dynamic>> userDoc = await FirebaseFirestore
+          .instance
+          .collection('users')
+          .doc(user.uid)
+          .get();
+
+      if (userDoc.exists) {
+        _updateProfilePictureIfNeeded(user);
+      } else {
+        print('User document does not exist in Firestore.');
+      }
+    } else {
+      print('No user is currently signed in.');
+    }
+  } catch (e) {
+    print('Error checking or updating profile picture: $e');
+  }
+}
+
+Future<void> _updateProfilePictureIfNeeded(User user) async {
+  try {
+    // Fetch current profile picture URL
+    String? currentProfilePictureUrl = user.photoURL;
+
+    // Get the profile picture URL from Firestore and compare
+    DocumentSnapshot<Map<String, dynamic>> userDoc = await FirebaseFirestore
+        .instance
+        .collection('users')
+        .doc(user.uid)
+        .get();
+
+    String? storedProfilePictureUrl = userDoc.data()?['profilePicture'];
+
+    if (currentProfilePictureUrl != storedProfilePictureUrl) {
+      // Update the profile picture in Firestore if needed
+      await FirebaseFirestore.instance
+          .collection('users')
+          .doc(user.uid)
+          .update({'profilePicture': currentProfilePictureUrl});
+    }
+  } catch (e) {
+    print('Error updating profile picture: $e');
+  }
+}
+
+@override
+Widget build(BuildContext context) {
+  return const SizedBox.shrink(); // No UI needed
 }

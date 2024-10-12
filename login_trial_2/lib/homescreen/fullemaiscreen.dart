@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:googleapis/gmail/v1.dart'; // Ensure this import is present for accessing Gmail message details
+// import 'package:googleapis/gmail/v1.dart'; // Ensure this import is present for accessing Gmail message details
 
 class FullEmailScreen extends StatelessWidget {
   final String subject;
@@ -8,12 +8,12 @@ class FullEmailScreen extends StatelessWidget {
   final String body;
 
   const FullEmailScreen({
-    Key? key,
+    super.key,
     required this.subject,
     required this.sender,
     required this.date,
     required this.body,
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context) {

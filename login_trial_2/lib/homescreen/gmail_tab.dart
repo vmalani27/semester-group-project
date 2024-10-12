@@ -1,11 +1,11 @@
 import 'dart:convert'; // Import for base64 decoding
-
 import 'package:flutter/material.dart';
 import 'package:googleapis/gmail/v1.dart';
 import 'package:login_trial_2/auth/firebase/auth_service.dart';
 import 'package:login_trial_2/auth/firebase/gmail_service.dart';
 import 'package:login_trial_2/homescreen/fullemaiscreen.dart';
 import 'package:provider/provider.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class GmailTab extends StatefulWidget {
   final ApiService apiService;
@@ -34,12 +34,13 @@ class _GmailTabState extends State<GmailTab> {
 
     try {
       await widget.apiService.init();
-      await _fetchAndClassifyEmails();
+      await _loadCachedEmails();
+      await _fetchAndClassifyNewEmails();
     } catch (e) {
       print('Error initializing ApiService: $e');
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Error initializing ApiService: $e')),
-      );
+      // ScaffoldMessenger.of(context).showSnackBar(
+      //   SnackBar(content: Text('Error initializing ApiService: $e')),
+      // );
     } finally {
       setState(() {
         isLoading = false;
@@ -47,7 +48,25 @@ class _GmailTabState extends State<GmailTab> {
     }
   }
 
-  Future<void> _fetchAndClassifyEmails() async {
+  Future<void> _loadCachedEmails() async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    String? cachedPriority = prefs.getString('cachedPriorityEmails');
+    String? cachedOptional = prefs.getString('cachedOptionalEmails');
+
+    if (cachedPriority != null) {
+      priorityMessages = (jsonDecode(cachedPriority) as List)
+          .map((e) => ClassifiedMessage.fromJson(e))
+          .toList();
+    }
+
+    if (cachedOptional != null) {
+      optionalMessages = (jsonDecode(cachedOptional) as List)
+          .map((e) => ClassifiedMessage.fromJson(e))
+          .toList();
+    }
+  }
+
+  Future<void> _fetchAndClassifyNewEmails() async {
     setState(() {
       isLoading = true;
     });
@@ -64,14 +83,20 @@ class _GmailTabState extends State<GmailTab> {
       final classifiedMessages =
           await widget.apiService.fetchAndClassifyEmails();
 
-      setState(() {
-        priorityMessages = classifiedMessages
-            .where((message) => message.spamProbability > 0.5)
-            .toList();
-        optionalMessages = classifiedMessages
-            .where((message) => message.spamProbability <= 0.5)
-            .toList();
-      });
+      // Classify and update the messages
+      final newPriorityMessages = classifiedMessages
+          .where((message) => message.spamProbability > 0.5)
+          .toList();
+      final newOptionalMessages = classifiedMessages
+          .where((message) => message.spamProbability <= 0.5)
+          .toList();
+
+      // Merge new messages with cached ones
+      priorityMessages.addAll(newPriorityMessages);
+      optionalMessages.addAll(newOptionalMessages);
+
+      // Store the updated lists in cache
+      await _cacheEmails();
     } catch (e) {
       print('Error fetching and classifying emails: $e');
       ScaffoldMessenger.of(context).showSnackBar(
@@ -82,6 +107,15 @@ class _GmailTabState extends State<GmailTab> {
         isLoading = false;
       });
     }
+  }
+
+  Future<void> _cacheEmails() async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    String cachedPriority = jsonEncode(priorityMessages);
+    String cachedOptional = jsonEncode(optionalMessages);
+
+    await prefs.setString('cachedPriorityEmails', cachedPriority);
+    await prefs.setString('cachedOptionalEmails', cachedOptional);
   }
 
   @override
@@ -125,7 +159,7 @@ class _GmailTabState extends State<GmailTab> {
                     orElse: () =>
                         MessagePartHeader(name: 'From', value: 'No sender'),
                   )
-                  ?.value;
+                  .value;
 
               final dateHeader = message.payload?.headers
                   ?.firstWhere(
@@ -133,7 +167,7 @@ class _GmailTabState extends State<GmailTab> {
                     orElse: () =>
                         MessagePartHeader(name: 'Date', value: 'No date'),
                   )
-                  ?.value;
+                  .value;
 
               final subject = message.snippet ?? 'No Subject';
               final sender = fromHeader ?? 'Unknown Sender';
@@ -209,7 +243,7 @@ class _GmailTabState extends State<GmailTab> {
             (part) =>
                 part.mimeType == 'text/plain' || part.mimeType == 'text/html',
             orElse: () => MessagePart())
-        ?.body
+        .body
         ?.data;
 
     if (bodyData != null) {

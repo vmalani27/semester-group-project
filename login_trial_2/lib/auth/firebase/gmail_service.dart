@@ -5,15 +5,36 @@ import 'package:http/http.dart' as http; // Import HTTP package for API calls
 import 'dart:async'; // For TimeoutException handling
 
 class ClassifiedMessage {
-  final Message message;
+  final Message message; // Assuming Message is your email message model
   final double spamProbability;
 
-  ClassifiedMessage({required this.message, required this.spamProbability});
+  ClassifiedMessage({
+    required this.message,
+    required this.spamProbability,
+  });
+
+  // Factory constructor to create a ClassifiedMessage from JSON
+  factory ClassifiedMessage.fromJson(Map<String, dynamic> json) {
+    return ClassifiedMessage(
+      message: Message.fromJson(
+          json['message']), // Implement fromJson in Message class as well
+      spamProbability: json['spamProbability'].toDouble(),
+    );
+  }
+
+  // Convert to JSON for caching
+  Map<String, dynamic> toJson() {
+    return {
+      'message': message.toJson(), // Implement toJson in Message class
+      'spamProbability': spamProbability,
+    };
+  }
 }
 
 class ApiService {
   late final AuthClient authClient;
   bool isInitialized = false; // Track initialization status
+  Set<String> classifiedEmailIds = {}; // Track classified email IDs
 
   ApiService(this.authClient);
 
@@ -50,8 +71,14 @@ class ApiService {
       // Check if we have messages
       if (messagesResponse.messages != null &&
           messagesResponse.messages!.isNotEmpty) {
-        // Fetch each message using its ID and classify
+        // Fetch each message using its ID and classify if not already processed
         for (var messageInfo in messagesResponse.messages!) {
+          if (classifiedEmailIds.contains(messageInfo.id)) {
+            print(
+                'Message ID ${messageInfo.id} has already been classified. Skipping.');
+            continue; // Skip this message if it has already been classified
+          }
+
           print('Fetching message with ID: ${messageInfo.id}');
           var message = await gmailApi.users.messages
               .get('me', messageInfo.id!, format: 'full');
@@ -69,11 +96,13 @@ class ApiService {
             print('Spam Probability for Email ID ${message.id}: $prediction');
 
             // Use the prediction to categorize the email
-            // Assuming 1 is for spam (priority) and 0 is for optional
             classifiedMessages.add(ClassifiedMessage(
               message: message,
               spamProbability: prediction,
             ));
+
+            // Add the classified email ID to the set
+            classifiedEmailIds.add(messageInfo.id!);
           } catch (e) {
             print('Error processing message ID ${messageInfo.id}: $e');
           }
@@ -145,7 +174,7 @@ class ApiService {
   Future<double> classifyEmail(String emailContent) async {
     try {
       print('Sending email content to Flask API for classification.');
-      final url = Uri.parse('http://172.22.176.86:5000');
+      final url = Uri.parse('http://172.22.176.86:5000/predict');
       final response = await http
           .post(
             url,

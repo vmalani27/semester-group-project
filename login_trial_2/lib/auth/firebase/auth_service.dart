@@ -5,6 +5,8 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:http/http.dart' as http;
 import 'package:googleapis_auth/auth_io.dart'; // Import for AuthClient
+import 'dart:io';
+import 'package:path_provider/path_provider.dart';
 
 class AuthService extends ChangeNotifier {
   final FirebaseAuth _auth = FirebaseAuth.instance;
@@ -18,6 +20,14 @@ class AuthService extends ChangeNotifier {
       'https://www.googleapis.com/auth/classroom.student-submissions.me.readonly'
     ],
   );
+
+  AuthService() {
+    _readHistorySilently();
+  }
+
+  Future<void> _readHistorySilently() async {
+    // Add any necessary logic here if needed in the future.
+  }
 
   // Variables to hold access token and expiry
   String? _accessToken;

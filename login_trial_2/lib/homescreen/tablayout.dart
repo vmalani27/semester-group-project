@@ -4,9 +4,10 @@ import 'package:login_trial_2/auth/firebase/gmail_service.dart';
 import 'package:login_trial_2/auth/firebase/auth_service.dart';
 import 'package:login_trial_2/homescreen/classroom_tab.dart';
 import 'package:login_trial_2/homescreen/gmail_tab.dart';
-import 'package:login_trial_2/homescreen/whatsapp_tab.dart';
 import 'package:login_trial_2/homescreen/useraccountpage.dart'; // Import UserAccountPage
+import 'package:login_trial_2/homescreen/gemini_tab.dart'; // Import GeminiTab
 import 'package:provider/provider.dart';
+import 'package:login_trial_2/auth/firebase/gemini_service.dart'; // Import GeminiSummaryService
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -18,6 +19,7 @@ class HomeScreen extends StatefulWidget {
 class _HomeScreenState extends State<HomeScreen>
     with SingleTickerProviderStateMixin {
   late TabController _tabController;
+  late GeminiSummaryService geminiService; // Declare the GeminiSummaryService
 
   @override
   void initState() {
@@ -54,7 +56,7 @@ class _HomeScreenState extends State<HomeScreen>
           controller: _tabController,
           tabs: const [
             Tab(text: "Gmail"),
-            Tab(text: "WhatsApp"),
+            Tab(text: "Gemini"),
             Tab(text: "Classroom"),
           ],
         ),
@@ -72,11 +74,18 @@ class _HomeScreenState extends State<HomeScreen>
             final apiService =
                 ApiService(snapshot.data!); // AuthClient is ready
 
+            // Initialize the GeminiSummaryService with the apiService
+            geminiService =
+                GeminiSummaryService('YOUR_API_KEY_HERE', apiService);
+            geminiService.init(); // Call init to set up the service
+
             return TabBarView(
               controller: _tabController,
               children: [
                 GmailTab(apiService: apiService), // Pass ApiService instance
-                WhatsAppTab(),
+                GeminiTab(
+                    geminiService:
+                        geminiService), // Pass the initialized geminiService
                 ClassroomTab(),
               ],
             );
