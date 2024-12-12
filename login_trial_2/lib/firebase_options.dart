@@ -47,16 +47,16 @@ class DefaultFirebaseOptions {
     projectId: 'f-r-i-d-a-y-vlelfh',
     authDomain: 'f-r-i-d-a-y-vlelfh.firebaseapp.com',
     databaseURL: 'https://f-r-i-d-a-y-vlelfh.firebaseio.com',
-    storageBucket: 'f-r-i-d-a-y-vlelfh.appspot.com',
+    storageBucket: 'f-r-i-d-a-y-vlelfh.firebasestorage.app',
   );
 
   static const FirebaseOptions android = FirebaseOptions(
     apiKey: 'AIzaSyBvGs5AAZ-MkuJzzwKT-WJLZlQ3tx6pkE8',
-    appId: '1:551724754459:android:a7f23a888b63602d5d7abe',
+    appId: '1:551724754459:android:ab997a1ed08064d05d7abe',
     messagingSenderId: '551724754459',
     projectId: 'f-r-i-d-a-y-vlelfh',
     databaseURL: 'https://f-r-i-d-a-y-vlelfh.firebaseio.com',
-    storageBucket: 'f-r-i-d-a-y-vlelfh.appspot.com',
+    storageBucket: 'f-r-i-d-a-y-vlelfh.firebasestorage.app',
   );
 
   static const FirebaseOptions ios = FirebaseOptions(
@@ -65,7 +65,8 @@ class DefaultFirebaseOptions {
     messagingSenderId: '551724754459',
     projectId: 'f-r-i-d-a-y-vlelfh',
     databaseURL: 'https://f-r-i-d-a-y-vlelfh.firebaseio.com',
-    storageBucket: 'f-r-i-d-a-y-vlelfh.appspot.com',
+    storageBucket: 'f-r-i-d-a-y-vlelfh.firebasestorage.app',
+    androidClientId: '551724754459-143mtaf6uh30uo4ifofrfcne5vpp3qsr.apps.googleusercontent.com',
     iosClientId: '551724754459-8vb5mj0fig6gnbp7jdsbsfa7t8cvt6ek.apps.googleusercontent.com',
     iosBundleId: 'com.example.loginTrial2',
   );
@@ -76,7 +77,8 @@ class DefaultFirebaseOptions {
     messagingSenderId: '551724754459',
     projectId: 'f-r-i-d-a-y-vlelfh',
     databaseURL: 'https://f-r-i-d-a-y-vlelfh.firebaseio.com',
-    storageBucket: 'f-r-i-d-a-y-vlelfh.appspot.com',
+    storageBucket: 'f-r-i-d-a-y-vlelfh.firebasestorage.app',
+    androidClientId: '551724754459-143mtaf6uh30uo4ifofrfcne5vpp3qsr.apps.googleusercontent.com',
     iosClientId: '551724754459-8vb5mj0fig6gnbp7jdsbsfa7t8cvt6ek.apps.googleusercontent.com',
     iosBundleId: 'com.example.loginTrial2',
   );
@@ -88,6 +90,7 @@ class DefaultFirebaseOptions {
     projectId: 'f-r-i-d-a-y-vlelfh',
     authDomain: 'f-r-i-d-a-y-vlelfh.firebaseapp.com',
     databaseURL: 'https://f-r-i-d-a-y-vlelfh.firebaseio.com',
-    storageBucket: 'f-r-i-d-a-y-vlelfh.appspot.com',
+    storageBucket: 'f-r-i-d-a-y-vlelfh.firebasestorage.app',
   );
+
 }

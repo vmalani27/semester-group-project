@@ -14,7 +14,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 // import 'package:login_trial_2/homescreen/tablayout.dart';
 // import 'package:login_trial_2/auth/gapps_auth.dart';
-// import 'package:google_sign_in/google_sign_in.dart';
+// import 'packge:google_sign_in/google_sign_in.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();

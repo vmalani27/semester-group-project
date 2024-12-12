@@ -24,7 +24,8 @@ allprojects {
         mavenCentral()
     }
     dependencies {
-    
+    // classpath ("com.android.tools.build:gradle:7.2.1") // Latest stable version
+
     //  classpath("com.google.gms:google-services:4.4.2")
 }
 }
