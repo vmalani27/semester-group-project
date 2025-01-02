@@ -174,7 +174,7 @@ class ApiService {
   Future<double> classifyEmail(String emailContent) async {
     try {
       print('Sending email content to Flask API for classification.');
-      final url = Uri.parse('http://192.168.211.86:5000/predict');
+      final url = Uri.parse('http://192.168.250.86:5000/predict');
       final response = await http
           .post(
             url,
